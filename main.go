@@ -216,9 +216,9 @@ func (ctx Context) DecodeAndExpand() error {
 		return err
 	}
 
-	gsdf := bytes.Compare(hdr.Signature[:], []byte("GSDF 10")) > 0
+	gsdf := bytes.Compare(hdr.Signature[:], []byte("GSDF 10")) == 0
 
-	if !gsdf && bytes.Compare(hdr.Signature[:], []byte("AEAD 10")) == 0 {
+	if !gsdf && bytes.Compare(hdr.Signature[:], []byte("AEAD 10")) != 0 {
 		return errors.New("Invalid signature")
 	}
 
