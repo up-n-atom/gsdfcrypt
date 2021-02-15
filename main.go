@@ -104,6 +104,7 @@ func (h Header) EncodedSize() uint32 {
 
 type Context struct {
 	compress bool
+	keysize  int
 	password Password
 	in       Input
 	out      Output
@@ -137,6 +138,10 @@ func (ctx Context) CompressAndEncode() error {
 	}
 
 	key, _ := hex.DecodeString(secret) // Not expecting an InvalidByteError
+
+	if ctx.keysize == 256 {
+		key = append(key, bytes.Repeat([]byte{0}, 32-len(key)%32)...)
+	}
 
 	blk, _ := aes.NewCipher(key) // Not expecting a KeySizeError
 
@@ -254,6 +259,10 @@ func (ctx Context) DecodeAndExpand() error {
 		return io.ErrUnexpectedEOF
 	}
 
+	if ctx.keysize == 256 {
+		key = append(key, bytes.Repeat([]byte{0}, 32-len(key)%32)...)
+	}
+
 	blk, _ := aes.NewCipher(key) // Not expecting a KeySizeError
 
 	ctr := cipher.NewCTR(blk, hdr.Nonce[:])
@@ -322,6 +331,8 @@ var (
 
 func init() {
 	flag.BoolVar(&ctx.compress, "c", false, empty)
+	flag.IntVar(&ctx.keysize, "keysize", 128, empty)
+	flag.IntVar(&ctx.keysize, "k", 128, empty)
 	flag.Var(&ctx.password, "password", empty)
 	flag.Var(&ctx.password, "p", empty)
 	flag.Var(&ctx.in, "input", empty)
@@ -333,19 +344,28 @@ func init() {
 func main() {
 	flag.Parse()
 
-	if len(ctx.in) == 0 || len(ctx.out) == 0 {
-		args := flag.Args()
+	if flag.Parsed() {
+		if len(ctx.in) == 0 || len(ctx.out) == 0 {
+			args := flag.Args()
 
-		if len(args) < 2 {
-			log.Fatal("Usage: gsdfcrypt <in> <out>")
+			if len(args) < 2 {
+				log.Fatal("Usage: gsdfcrypt <in> <out>")
+			}
+
+			if err := ctx.in.Set(args[0]); err != nil {
+				log.Fatal(err)
+			}
+
+			if err := ctx.out.Set(args[1]); err != nil {
+				log.Fatal(err)
+			}
 		}
 
-		if err := ctx.in.Set(args[0]); err != nil {
-			log.Fatal(err)
-		}
-
-		if err := ctx.out.Set(args[1]); err != nil {
-			log.Fatal(err)
+		switch ctx.keysize {
+		case 128, 256:
+			break
+		default:
+			log.Fatal(aes.KeySizeError(ctx.keysize))
 		}
 	}
 
