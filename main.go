@@ -344,29 +344,30 @@ func init() {
 func main() {
 	flag.Parse()
 
-	if flag.Parsed() {
-		if len(ctx.in) == 0 || len(ctx.out) == 0 {
-			args := flag.Args()
+	for !flag.Parsed() {
+	}
 
-			if len(args) < 2 {
-				log.Fatal("Usage: gsdfcrypt <in> <out>")
-			}
+	if len(ctx.in) == 0 || len(ctx.out) == 0 {
+		args := flag.Args()
 
-			if err := ctx.in.Set(args[0]); err != nil {
-				log.Fatal(err)
-			}
-
-			if err := ctx.out.Set(args[1]); err != nil {
-				log.Fatal(err)
-			}
+		if len(args) < 2 {
+			log.Fatal("Usage: gsdfcrypt <in> <out>")
 		}
 
-		switch ctx.keysize {
-		case 128, 256:
-			break
-		default:
-			log.Fatal(aes.KeySizeError(ctx.keysize))
+		if err := ctx.in.Set(args[0]); err != nil {
+			log.Fatal(err)
 		}
+
+		if err := ctx.out.Set(args[1]); err != nil {
+			log.Fatal(err)
+		}
+	}
+
+	switch ctx.keysize {
+	case 128, 256:
+		break
+	default:
+		log.Fatal(aes.KeySizeError(ctx.keysize))
 	}
 
 	if ctx.compress {
