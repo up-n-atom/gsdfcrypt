@@ -139,11 +139,7 @@ func (ctx Context) CompressAndEncode() error {
 
 	key, _ := hex.DecodeString(secret) // Not expecting an InvalidByteError
 
-	if ctx.keysize == 256 {
-		key = append(key, bytes.Repeat([]byte{0}, 32-len(key)%32)...)
-	}
-
-	blk, _ := aes.NewCipher(key) // Not expecting a KeySizeError
+	blk, _ := aes.NewCipher(key[:ctx.keysize/8]) // Not expecting a KeySizeError
 
 	nonce := make([]byte, aes.BlockSize)
 
@@ -165,7 +161,7 @@ func (ctx Context) CompressAndEncode() error {
 
 	copy(hdr.Signature[:], []byte("AEAD 10\000"))
 	copy(hdr.Nonce[:], nonce)
-	copy(hdr.Hash[:], key)
+	copy(hdr.Hash[:], key[:aes.BlockSize])
 
 	hdr.AssocSize = uint32(len(assoctxt))
 	hdr.FileSize = hdr.AssocSize + uint32(len(ciphertxt)+hdr.Size())
@@ -233,7 +229,7 @@ func (ctx Context) DecodeAndExpand() error {
 
 	key, _ := hex.DecodeString(secret)
 
-	copy(txt[32:48], key)
+	copy(txt[32:48], key[:aes.BlockSize])
 
 	hash := sha256.New()
 
@@ -259,11 +255,7 @@ func (ctx Context) DecodeAndExpand() error {
 		return io.ErrUnexpectedEOF
 	}
 
-	if ctx.keysize == 256 {
-		key = append(key, bytes.Repeat([]byte{0}, 32-len(key)%32)...)
-	}
-
-	blk, _ := aes.NewCipher(key) // Not expecting a KeySizeError
+	blk, _ := aes.NewCipher(key[:ctx.keysize/8]) // Not expecting a KeySizeError
 
 	ctr := cipher.NewCTR(blk, hdr.Nonce[:])
 
@@ -322,7 +314,7 @@ func (ctx Context) DecodeAndExpand() error {
 
 const (
 	empty  = ""
-	secret = "7da25813dd9d7a153e60a028baddb288"
+	secret = "7da25813dd9d7a153e60a028baddb28800000000000000000000000000000000"
 )
 
 var (
@@ -331,8 +323,8 @@ var (
 
 func init() {
 	flag.BoolVar(&ctx.compress, "c", false, empty)
-	flag.IntVar(&ctx.keysize, "keysize", 128, empty)
-	flag.IntVar(&ctx.keysize, "k", 128, empty)
+	flag.IntVar(&ctx.keysize, "keysize", 256, empty)
+	flag.IntVar(&ctx.keysize, "k", 256, empty)
 	flag.Var(&ctx.password, "password", empty)
 	flag.Var(&ctx.password, "p", empty)
 	flag.Var(&ctx.in, "input", empty)
