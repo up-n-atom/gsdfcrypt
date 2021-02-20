@@ -159,7 +159,7 @@ func (ctx Context) CompressAndEncode() error {
 
 	hdr := Header{}
 
-	copy(hdr.Signature[:], []byte("AEAD 10\000"))
+	copy(hdr.Signature[:], []byte(AEAD10))
 	copy(hdr.Nonce[:], nonce)
 	copy(hdr.Hash[:], key[:aes.BlockSize])
 
@@ -217,9 +217,9 @@ func (ctx Context) DecodeAndExpand() error {
 		return err
 	}
 
-	gsdf := bytes.Compare(hdr.Signature[:], []byte("GSDF 10\000")) == 0
+	gsdf := bytes.Compare(hdr.Signature[:], []byte(GSDF10)) == 0
 
-	if !gsdf && bytes.Compare(hdr.Signature[:], []byte("AEAD 10\000")) != 0 {
+	if !gsdf && bytes.Compare(hdr.Signature[:], []byte(AEAD10)) != 0 {
 		return errors.New("Invalid signature")
 	}
 
@@ -313,6 +313,8 @@ func (ctx Context) DecodeAndExpand() error {
 }
 
 const (
+	GSDF10 = "GSDF 10\000"
+	AEAD10 = "AEAD 10\000"
 	empty  = ""
 	secret = "7da25813dd9d7a153e60a028baddb28800000000000000000000000000000000"
 )
