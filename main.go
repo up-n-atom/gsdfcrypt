@@ -345,7 +345,7 @@ func main() {
 		args := flag.Args()
 
 		if len(args) < 2 {
-			log.Fatal("Usage: gsdfcrypt <in> <out>")
+			log.Fatal("Usage: gsdfcrypt [-c] [-k 128|256] [-p password] <in> <out>")
 		}
 
 		if err := ctx.in.Set(args[0]); err != nil {
