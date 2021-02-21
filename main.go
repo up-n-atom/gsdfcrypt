@@ -342,17 +342,15 @@ func main() {
 	}
 
 	if len(ctx.in) == 0 || len(ctx.out) == 0 {
-		args := flag.Args()
-
-		if len(args) < 2 {
+		if flag.NArg() < 2 {
 			log.Fatal("Usage: gsdfcrypt [-c] [-k 128|256] [-p password] <in> <out>")
 		}
 
-		if err := ctx.in.Set(args[0]); err != nil {
+		if err := ctx.in.Set(flag.Arg(0)); err != nil {
 			log.Fatal(err)
 		}
 
-		if err := ctx.out.Set(args[1]); err != nil {
+		if err := ctx.out.Set(flag.Arg(1)); err != nil {
 			log.Fatal(err)
 		}
 	}
