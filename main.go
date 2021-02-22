@@ -12,6 +12,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"flag"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
@@ -333,6 +334,10 @@ func init() {
 	flag.Var(&ctx.in, "in", empty)
 	flag.Var(&ctx.out, "output", empty)
 	flag.Var(&ctx.out, "out", empty)
+
+	flag.Usage = func() {
+		fmt.Fprintf(flag.CommandLine.Output(), "Usage: %s [-c] [-k 128|256] [-p password] <in> <out>\n", flag.CommandLine.Name())
+	}
 }
 
 func main() {
@@ -343,7 +348,8 @@ func main() {
 
 	if len(ctx.in) == 0 || len(ctx.out) == 0 {
 		if flag.NArg() < 2 {
-			log.Fatal("Usage: gsdfcrypt [-c] [-k 128|256] [-p password] <in> <out>")
+			flag.Usage()
+			os.Exit(1)
 		}
 
 		if err := ctx.in.Set(flag.Arg(0)); err != nil {
