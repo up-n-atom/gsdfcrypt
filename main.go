@@ -326,13 +326,9 @@ var (
 
 func init() {
 	flag.BoolVar(&ctx.compress, "c", false, empty)
-	flag.IntVar(&ctx.keysize, "keysize", 256, empty)
 	flag.IntVar(&ctx.keysize, "k", 256, empty)
-	flag.Var(&ctx.password, "password", empty)
 	flag.Var(&ctx.password, "p", empty)
-	flag.Var(&ctx.in, "input", empty)
 	flag.Var(&ctx.in, "in", empty)
-	flag.Var(&ctx.out, "output", empty)
 	flag.Var(&ctx.out, "out", empty)
 
 	flag.Usage = func() {
