@@ -321,7 +321,8 @@ const (
 )
 
 var (
-	ctx Context
+	version string
+	ctx     Context
 )
 
 func init() {
@@ -337,9 +338,16 @@ func init() {
 }
 
 func main() {
+	ver := flag.Bool("V", false, empty)
+
 	flag.Parse()
 
 	for !flag.Parsed() {
+	}
+
+	if *ver {
+		fmt.Fprintf(flag.CommandLine.Output(), "%s ver. %s\n", flag.CommandLine.Name(), version)
+		os.Exit(0)
 	}
 
 	if len(ctx.in) == 0 || len(ctx.out) == 0 {
