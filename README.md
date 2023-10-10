@@ -1,4 +1,6 @@
-# F@st 5566/~~5689~~ configuration restoration tool
+# F@st 5566/5689 configuration restoration tool
+
+> [!NOTE] Backup/Restore has been removed in the latest firmware updates for both the F@st 5566 and 5689
 
 Decodes and encodes backup *cfg* files.
 
